@@ -315,4 +315,149 @@ src="https://www.facebook.com/tr?id=1055612456827236&ev=PageView&noscript=1"
       <div class="options">
         <button class="opt" onclick="selectAnswer('reference','Yes, I know exactly what I want')">Yes<span class="tag">Know exactly what I want</span></button>
         <button class="opt" onclick="selectAnswer('reference','Sort of, I have a rough idea')">Sort of<span class="tag">Rough idea</span></button>
-        <button class="opt" onclick="selectAnswer('reference','Just researching for now')">Not yet<span class="t
+        <button class="opt" onclick="selectAnswer('reference','Just researching for now')">Not yet<span class="tag">Just researching</span></button>
+      </div>
+      <button class="back-link" onclick="goTo(2)">&larr; Back</button>
+    </section>
+
+    <!-- Q4 -->
+    <section class="screen" data-screen="4">
+      <div class="step-tag">STEP 4 OF 5</div>
+      <h1>WHAT'S YOUR BUDGET RANGE?</h1>
+      <p class="sub">Helps us recommend the right session length. All prices in euro.</p>
+      <div class="options">
+        <button class="opt" onclick="selectAnswer('budget','&euro;150 &ndash; &euro;300')">&euro;150 &ndash; &euro;300</button>
+        <button class="opt" onclick="selectAnswer('budget','&euro;300 &ndash; &euro;600')">&euro;300 &ndash; &euro;600</button>
+        <button class="opt" onclick="selectAnswer('budget','&euro;600 &ndash; &euro;1,200')">&euro;600 &ndash; &euro;1,200</button>
+        <button class="opt" onclick="selectAnswer('budget','&euro;1,200+')">&euro;1,200+</button>
+      </div>
+      <button class="back-link" onclick="goTo(3)">&larr; Back</button>
+    </section>
+
+    <!-- Q5 -->
+    <section class="screen" data-screen="5">
+      <div class="step-tag">STEP 5 OF 5</div>
+      <h1>WHEN DO YOU WANT TO BOOK?</h1>
+      <p class="sub">We're only in Dublin for a limited stretch &mdash; good to know your timing.</p>
+      <div class="options">
+        <button class="opt" onclick="selectAnswer('timing','This week')">This week<span class="tag">ASAP</span></button>
+        <button class="opt" onclick="selectAnswer('timing','Next 2 weeks')">Next 2 weeks</button>
+        <button class="opt" onclick="selectAnswer('timing','Not sure yet')">Not sure yet</button>
+      </div>
+      <button class="back-link" onclick="goTo(4)">&larr; Back</button>
+    </section>
+
+    <!-- Name capture -->
+    <section class="screen" data-screen="name">
+      <div class="step-tag">ALMOST THERE</div>
+      <h1>WHAT'S YOUR NAME?</h1>
+      <p class="sub">So we know who we're talking to when your message lands.</p>
+      <input type="text" id="nameInput" placeholder="Your first name">
+      <button class="btn-primary" onclick="submitName()">See my match &rarr;</button>
+    </section>
+
+    <!-- Result -->
+    <section class="screen" data-screen="result">
+      <div class="step-tag">YOU'RE SORTED</div>
+      <h1 id="resultHeadline">GREAT FIT FOR OUR STUDIO</h1>
+      <p class="sub" id="resultSub">Based on what you've told us, this is exactly the kind of work we love doing. Send this straight to us on WhatsApp and we'll get back to you with real availability today.</p>
+      <div class="result-card" id="resultCard"></div>
+      <button class="btn-whatsapp" onclick="sendToWhatsApp()">
+        <svg class="whatsapp-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.5-.1-.7.1-.2.3-.7.9-.9 1.1-.2.2-.3.2-.6.1-.3-.2-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6.1-.1.3-.4.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.5-.8-2-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.6 1.1 2.8c.2.2 1.7 2.6 4.1 3.5 2.4.9 2.4.6 2.9.5.4-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.6-.3zM12 2C6.5 2 2 6.5 2 12c0 1.9.5 3.7 1.5 5.3L2 22l4.9-1.3C8.4 21.5 10.2 22 12 22c5.5 0 10-4.5 10-10S17.5 2 12 2z"/></svg>
+        SEND MY ANSWERS
+      </button>
+      <button class="back-link" onclick="restart()">&larr; Start over</button>
+    </section>
+
+  </main>
+
+  <footer>YOUR ANSWERS GO STRAIGHT TO OUR ARTIST &middot; NO SPAM &middot; NO SIGN-UP</footer>
+</div>
+
+<script>
+  var STEPS = ['intro','1','2','3','4','5','name','result'];
+  var answers = {style:'',size:'',reference:'',budget:'',timing:'',name:''};
+  var currentIndex = 0;
+  var quizStarted = false;
+
+  function goTo(stepIndex){
+    var screens = document.querySelectorAll('.screen');
+    for (var i = 0; i < screens.length; i++){ screens[i].classList.remove('active'); }
+    var key = STEPS[stepIndex];
+    document.querySelector('[data-screen="' + key + '"]').classList.add('active');
+    currentIndex = stepIndex;
+    var pct = Math.min(100, (stepIndex / 5) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    window.scrollTo(0, 0);
+
+    if (stepIndex === 1 && !quizStarted){
+      quizStarted = true;
+      if (typeof fbq !== 'undefined'){ fbq('trackCustom', 'QuizStarted'); }
+    }
+  }
+
+  function selectAnswer(field, value){
+    answers[field] = value;
+    goTo(currentIndex + 1);
+  }
+
+  function submitName(){
+    var val = document.getElementById('nameInput').value.trim();
+    answers.name = val || 'Friend';
+    buildResult();
+    goTo(7);
+    if (typeof fbq !== 'undefined'){ fbq('track', 'Lead'); }
+    var highBudget = (answers.budget.indexOf('600') !== -1 || answers.budget.indexOf('1,200') !== -1);
+    var urgent = (answers.timing === 'This week' || answers.timing === 'Next 2 weeks');
+    if (highBudget && urgent && typeof fbq !== 'undefined'){
+      fbq('trackCustom', 'QualifiedLead');
+    }
+  }
+
+  function buildResult(){
+    var card = document.getElementById('resultCard');
+    card.innerHTML =
+      row('Style', answers.style) +
+      row('Size', answers.size) +
+      row('Reference', answers.reference) +
+      row('Budget', answers.budget) +
+      row('Timing', answers.timing);
+
+    var headline = document.getElementById('resultHeadline');
+    var sub = document.getElementById('resultSub');
+    if (answers.style === 'Realism'){
+      headline.textContent = 'THIS IS EXACTLY OUR THING';
+      sub.textContent = "Realism is our artist's main style, this is precisely the kind of piece we came to Dublin to create. Send it through and we'll sort your slot.";
+    } else {
+      headline.textContent = 'GREAT FIT FOR OUR STUDIO';
+      sub.textContent = "Based on what you've told us, we'd love to work on this with you. Send this straight to us on WhatsApp and we'll get back with real availability today.";
+    }
+  }
+
+  function row(label, value){
+    return '<div class="result-row"><span class="k">' + label + '</span><span class="v">' + value + '</span></div>';
+  }
+
+  function sendToWhatsApp(){
+    var msg =
+      "Hi! I just did the tattoo quiz, here's what I'm after:\n\n" +
+      "Name: " + answers.name + "\n" +
+      "Style: " + answers.style + "\n" +
+      "Size: " + answers.size + "\n" +
+      "Reference: " + answers.reference + "\n" +
+      "Budget: " + answers.budget + "\n" +
+      "Timing: " + answers.timing + "\n\n" +
+      "I'd love to book a consultation!";
+    var encoded = encodeURIComponent(msg);
+    var waNumber = "5522998505348";
+    window.location.href = "https://wa.me/" + waNumber + "?text=" + encoded;
+  }
+
+  function restart(){
+    for (var k in answers){ answers[k] = ''; }
+    quizStarted = false;
+    goTo(0);
+  }
+</script>
+</body>
+</html>
